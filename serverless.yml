@@ -1,0 +1,43 @@
+service: my-service
+frameworkVersion: ^3.22.0
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: eu-central-1
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "sqs:SendMessage"
+          Resource:
+            - !GetAtt MyQueue.Arn
+
+package:
+  patterns:
+    - '!package.json'
+    - '!package-lock.json'
+
+functions:
+  sendMessage:
+    handler: producer.handler
+    events:
+      - http:
+          path: /send-message
+          method: post
+    environment:
+      SQS_QUEUE_URL: !Ref MyQueue
+  processMessage:
+    handler: consumer.handler
+    events:
+      - sqs:
+          arn: !GetAtt MyQueue.Arn
+          batchSize: 1
+
+resources:
+  Resources:
+    MyQueue:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: "my-queue"

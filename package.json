@@ -1,0 +1,8 @@
+{
+  "name": "sqs-queue-demo",
+  "version": "1.0.0",
+  "devDependencies": {
+    "@aws-sdk/client-sqs": "^3.295.0",
+    "serverless": "^3.28.1"
+  }
+}
