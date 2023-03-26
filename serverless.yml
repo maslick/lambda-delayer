@@ -13,6 +13,11 @@ provider:
             - "sqs:SendMessage"
           Resource:
             - !GetAtt MyQueue.Arn
+        - Effect: "Allow"
+          Action:
+            - "sns:Publish"
+          Resource:
+            - !Ref MySNSTopic
 
 package:
   patterns:
@@ -34,6 +39,8 @@ functions:
       - sqs:
           arn: !GetAtt MyQueue.Arn
           batchSize: 1
+    environment:
+      SNS_TOPIC_ARN: !Ref MySNSTopic
 
 resources:
   Resources:
@@ -41,3 +48,14 @@ resources:
       Type: "AWS::SQS::Queue"
       Properties:
         QueueName: "my-queue"
+    MySNSTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: "My SNS Topic"
+        TopicName: "my-sns-topic"
+    MyEmailSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        Protocol: email
+        TopicArn: !Ref MySNSTopic
+        Endpoint: mail@example.com
